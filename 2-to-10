@@ -1,0 +1,25 @@
+# 2 to 10:
+### Implementing the positional formula in J
+*If you are unfamiliar with J concepts, please see [here](https://4hg.github.io/writeups/concepts).*
+
+The code is represented in a legible format here: `+/ 2 ^ (# i.@:$) |. ". ,. ": b_num`. It is important to note that there are primitives for converting bases in J, however, there is little to learn if you do not get your hands dirty. To start, the first important thing that needs to happen here is to convert the binary number into a list of digits, i.e `1011 -> 1 0 1 1`, and this is done by the sequence `". ,. ":` which is executed as follows:
+  - `":` converts our number into a string
+  - `,.` puts every character in that string into its own row creating a 1xn matrix
+  - `".` is the Do verb and executes each row collecting the results into a rank 1 array. This is very common when converting a string to a number.
+  
+The next step is to reverse the whole thing with `|.`. You might be wondering why this is necessary. It is because in binary our 0 index is on the right hand side, as opposed to the left hand side. This is to avoid `1011` being represented as `1101`. Next, is the sequence `(# i. @: $)`. This is a bit confusing to reason about and was the hardest part to come up with, but with a good explanation it all becomes very clear.
+
+In J, function composition is very powerful. This is an example of a hook. If `f` is dyadic and `g` is monadic, then for an argument `x`, the form `(f g) x` is evaluated as `x f (g x)`. Now, obviously, this is really only special because one of our functions is dyadic, otherwise `(f g) x` would simply be evaluated as `f (g x)`. Secondly, we have three total functions in this case, but the reason we can use the dyadic-monadic hook form is because we compose the two monadic verbs `i.` and `$` with our function composition verb `@:`. It is treated as one monadic unit in this case, and can be written as `g =: i. @: $` to make things simpler. Furthermore, we can write `f =: #` which gives us `(f g) x` where `x` is our digit array. This sequence is executed:
+- `g` 
+	- `$` counts the number of items in our digit array
+	- `@:` composes the two verbs
+	- `i.` creates a sequence from 0 to n exclusive where n is the length of our digit array
+- `#`
+	- dyadic `n # a` returns `n` copies of each item in `a`, when `n` is an array, the values are mapped respectively so `2 1 3 # 1 2 3 -> 1 1 2 3 3 3`.
+
+Since our digit array is actually a boolean array, we are essentially filtering out the indices whose values in our array are 0. This is a very common use case. You can also see how the hook scheme comes in handy here since we want our boolean array on the left hand side, as opposed to `0 1 2 # 1 0 1 -> 0 1 1`. The last step is to perform `2^` on each item in our array and collect the sum, so we do:
+- `^` the dyadic power verb using 2 as the base, `2^4 -> 16` and `2 ^ 2 3 4 -> 2^2 2^3 2^4 -> 4 8 16`
+- `+/` inserts binary `+` into the array, `+/ 1 2 3 -> 1 + 2 + 3 -> 6`
+	- `/` here is an adverb but creates a new verb when paired with `+`.
+
+If you want to read up more on the functions used consider using [NuVoc](https://code.jsoftware.com/wiki/NuVoc), and if you want to learn more J consider the fabulous [Learning J book](https://www.jsoftware.com/help/learning/contents.htm). There is also  	an APL discord with a J channel, which is where I got help doing those initial conversions, that you can join with [this](https://discord.gg/pc2PFP39bP)
