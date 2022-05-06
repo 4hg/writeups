@@ -20,7 +20,10 @@ The entire program can be summed up by the following lines:
 ```
 r =: (10#4) #: ? 1048575
 s =: ? 500 $ 3
-g =: {{ r {~ +/ > |.&y each 1 0 _1 }}
+g =: monad def 'r {~ +/ > |.&y each 1 0 _1'
+res =: g^:(<500) s 
+NB. Final grid will be 500x500
+NB. https://code.jsoftware.com/wiki/Vocabulary/hatco#Boxed_Numeric_n_--_decoding_variable-length_records
 ```
 
 `r` is the rule, `s` is the initial cell array, and `g` is the function for calculating the next generation given a cell array. 
